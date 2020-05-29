@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\SetAppKey::class
     ];
 
     /**
@@ -25,5 +25,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         //
+    }
+
+    protected function commands()
+    {
+        $this->load(__DIR__.'/Commands');
     }
 }
