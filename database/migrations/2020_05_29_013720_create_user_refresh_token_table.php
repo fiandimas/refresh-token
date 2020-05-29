@@ -16,7 +16,7 @@ class CreateUserRefreshTokenTable extends Migration
         Schema::create('user_refresh_token', function (Blueprint $table) {
             $table->tinyIncrements('id');
             $table->unsignedTinyInteger('user_id');
-            $table->char('refresh_token', 64);
+            $table->char('token', 64);
             $table->dateTime('expired_at');
             $table->timestamps();
             $table->softDeletes();
