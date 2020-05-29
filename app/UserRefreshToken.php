@@ -10,8 +10,9 @@ class UserRefreshToken extends Model
     use SoftDeletes;
 
     protected $table = 'user_refresh_token';
+
     protected $fillable = [
-        'name_id', 'token', 'expired_at'
+        'user_id', 'token', 'expired_at'
     ];
 
     protected $hidden = [
