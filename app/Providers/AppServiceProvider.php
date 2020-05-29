@@ -13,6 +13,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton('UserManager', function () {
+            return new \App\Services\User\UserManager;
+        });
     }
 }
