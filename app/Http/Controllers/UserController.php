@@ -40,8 +40,6 @@ class UserController extends Controller
 
     public function refreshToken()
     {
-        $start = memory_get_usage();
-
         $request = app('request');
         $userRefreshToken = null;
 
@@ -70,14 +68,9 @@ class UserController extends Controller
             $refreshToken = $userManager->updateOrCreateRefreshToken($user->id, $userAgent)->token;
         }
 
-        $token = $userManager->createJWT($user);
-
-        $end = memory_get_usage();
-
         return response()->json([
-            'token' => $token,
-            'refresh_token' => $refreshToken,
-            'result' => $end - $start
+            'token' => $userManager->createJWT($user),
+            'refresh_token' => $refreshToken
         ]);
     }
 }
