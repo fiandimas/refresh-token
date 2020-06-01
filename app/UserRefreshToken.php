@@ -12,12 +12,17 @@ class UserRefreshToken extends Model
     protected $table = 'user_refresh_token';
 
     protected $fillable = [
-        'user_id', 'token', 'expired_at'
+        'user_id', 'token', 'key', 'user_agent', 'expired_at'
     ];
 
     protected $hidden = [
         'expired_at', 'created_at', 'updated_at', 'deleted_at'
     ];
+
+    public function getRandomKeyAttribute()
+    {
+        return 'key';
+    }
 
     public function user()
     {

@@ -17,6 +17,8 @@ class CreateUserRefreshTokenTable extends Migration
             $table->tinyIncrements('id');
             $table->unsignedTinyInteger('user_id');
             $table->char('token', 64);
+            $table->char('key', 32);
+            $table->text('user_agent');
             $table->dateTime('expired_at');
             $table->timestamps();
             $table->softDeletes();

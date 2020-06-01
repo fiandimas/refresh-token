@@ -16,5 +16,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('UserManager', function () {
             return new \App\Services\User\UserManager;
         });
+        $this->app->singleton('ValidatorManager', function () {
+            return new \App\Services\Validator\ValidatorManager;
+        });
     }
 }

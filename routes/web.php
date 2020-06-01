@@ -12,3 +12,5 @@
 */
 
 $router->post('auth/login', 'LoginController@login');
+$router->get('/me', 'UserController@me');
+$router->put('/user/token/refresh', 'UserController@refreshToken');
