@@ -42,17 +42,14 @@ class UserController extends Controller
     {
         $request = app('request');
 
-        $token = $request->header('token', null);
         $refreshToken = $request->header('refresh-token', null);
 
         try {
-            if (is_null($token) || is_null($refreshToken)) {
+            if (is_null($refreshToken)) {
                 throw new Exception('err');
             }
 
-            $data = JWT::decode($token, env('APP_KEY'), ['HS256']);
-
-            $userRefreshToken = UserRefreshToken::where('user_id', $data->id)->where('token', $refreshToken)->first();
+            $userRefreshToken = UserRefreshToken::where('token', $refreshToken)->with('user')->first();
 
             if (is_null($userRefreshToken)) {
                 throw new Exception('refresh token not found');
@@ -64,12 +61,11 @@ class UserController extends Controller
                 $refreshToken = app('UserManager')->updateOrCreateRefreshToken($data->id)->token;
             }
 
-            $data->exp = config('const.EXPIRED_JWT');
-
-            $token = JWT::encode($data, env('APP_KEY'), 'HS256');
+            $userManager = app('UserManager');
+            $userManager->_setUser($userRefreshToken->user);
 
             return response()->json([
-                'token' => $token,
+                'token' => $userManager->createJWT(),
                 'refresh_token' => $refreshToken
             ]);
         } catch (\Exception $e) {
