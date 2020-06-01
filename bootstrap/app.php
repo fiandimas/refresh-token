@@ -26,6 +26,7 @@ $app = new Laravel\Lumen\Application(
  $app->withEloquent();
 
  $app->configure('const');
+$app->configure('logging');
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings

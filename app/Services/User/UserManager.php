@@ -8,46 +8,45 @@ use Firebase\JWT\JWT;
 
 class UserManager
 {
-    private $_user;
-
-    public function _setUser($user)
+    public function getByUsername($username)
     {
-        $this->_user = $user;
+        return User::select('id', 'name', 'username', 'password')->where('username', $username)->first();
     }
 
-    public function getByUsername($username, $relations = [])
+    public function getById($id)
     {
-        return User::select('id', 'name', 'username', 'password')->where('username', $username)->with($relations)->first();
+        return User::select('id', 'name', 'username', 'password')->where('id', $id)->first();
     }
 
-    public function isRegistered()
+    public function appendRelation($user)
     {
-        if (is_null($this->_user)) {
+        return $user->with();
+    }
+
+    public function isRegistered($user)
+    {
+        if (is_null($user)) {
             throw new UserNotRegisteredException();
         }
     }
 
-    public function passwordIsMatch($password)
+    public function passwordIsMatch($password, $userPassword)
     {
-        if (app('hash')->check($password, $this->_user->password) === false) {
+        if (app('hash')->check($password, $userPassword) === false) {
             throw new PasswordNotMatchException();
         }
     }
 
-    public function refreshTokenNeedToUpdate()
+    public function refreshTokenNeedToUpdate($userRefreshToken, $userAgent)
     {
-        $userRefreshToken = $this->_user->refreshToken;
-        $userAgent = app('request')->header('user-agent', '');
         if (is_null($userRefreshToken) || time() > strtotime($userRefreshToken->expired_at) || strcmp($userRefreshToken->user_agent, $userAgent) !== 0) {
             return true;
         }
     }
 
-    public function updateOrCreateRefreshToken()
+    public function updateOrCreateRefreshToken($userId, $userAgent)
     {
-        $userId = $this->_user->id;
         $key = \Illuminate\Support\Str::random(32);
-        $userAgent = app('request')->header('user-agent', '');
         $token = hash('SHA256', $userId . $key . $userAgent);
         $exp = date('Y-m-d H:i:s', config('const.EXPIRED_REFRESH_TOKEN'));
 
@@ -62,12 +61,12 @@ class UserManager
         ]);
     }
 
-    public function createJWT()
+    public function createJWT($user)
     {
         $data = [
-            'id' => $this->_user->id,
-            'name' => $this->_user->name,
-            'username' => $this->_user->username,
+            'id' => $user->id,
+            'name' => $user->name,
+            'username' => $user->username,
             'exp' => config('const.EXPIRED_JWT')
         ];
 

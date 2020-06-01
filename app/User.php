@@ -14,11 +14,11 @@ class User extends Model
     ];
 
     protected $hidden = [
-        'password', 'created_at', 'updated_at', 'deleted_at'
+        'password'
     ];
 
-    public function refreshToken()
+    public function getRefreshTokenAttribute()
     {
-        return $this->hasOne(UserRefreshToken::class, 'user_id');
+        return UserRefreshToken::select('id', 'user_id', 'token', 'key', 'user_agent', 'expired_at')->where('user_id', $this->attributes['id'])->first();
     }
 }

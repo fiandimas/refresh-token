@@ -40,7 +40,10 @@ class UserController extends Controller
 
     public function refreshToken()
     {
+        $start = memory_get_usage();
+
         $request = app('request');
+        $userRefreshToken = null;
 
         $refreshToken = $request->header('refresh-token', null);
 
@@ -49,27 +52,32 @@ class UserController extends Controller
                 throw new Exception('err');
             }
 
-            $userRefreshToken = UserRefreshToken::where('token', $refreshToken)->with('user')->first();
+            $userRefreshToken = UserRefreshToken::where('token', $refreshToken)->first();
 
             if (is_null($userRefreshToken)) {
                 throw new Exception('refresh token not found');
             }
-
-            $refreshToken = $userRefreshToken->token;
-
-            if (time() > strtotime($userRefreshToken->expired_at)) {
-                $refreshToken = app('UserManager')->updateOrCreateRefreshToken($data->id)->token;
-            }
-
-            $userManager = app('UserManager');
-            $userManager->_setUser($userRefreshToken->user);
-
-            return response()->json([
-                'token' => $userManager->createJWT(),
-                'refresh_token' => $refreshToken
-            ]);
         } catch (\Exception $e) {
             return $e->getMessage();
         }
+
+        $userAgent = $request->header('user-agent', '');
+
+        $userManager = app('UserManager');
+        $user = $userManager->getById($userRefreshToken->user_id);
+
+        if ($userManager->refreshTokenNeedToUpdate($userRefreshToken, $userAgent)) {
+            $refreshToken = $userManager->updateOrCreateRefreshToken($user->id, $userAgent)->token;
+        }
+
+        $token = $userManager->createJWT($user);
+
+        $end = memory_get_usage();
+
+        return response()->json([
+            'token' => $token,
+            'refresh_token' => $refreshToken,
+            'result' => $end - $start
+        ]);
     }
 }

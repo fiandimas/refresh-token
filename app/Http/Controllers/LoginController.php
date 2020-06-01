@@ -14,24 +14,26 @@ class LoginController extends Controller
             app('ValidatorManager')->validate(self::rule());
 
             $userManager = app('UserManager');
-            $user = $userManager->getByUsername($request->username, 'refreshToken');
-            $userManager->_setUser($user);
+            $user = $userManager->getByUsername($request->username);
 
-            $userManager->isRegistered();
-            $userManager->passwordIsMatch($request->password);
+            $userManager->isRegistered($user);
+            $userManager->passwordIsMatch($request->password, $user->password);
         } catch (\ValidatorException $e) {
         } catch (\UserNotRegisteredException $e) {
         } catch (\PasswordNotMatchException $e) {
         }
 
-        $refreshToken = optional($user->refreshToken)->token;
+        $userAgent = $request->header('user-agent');
 
-        if ($userManager->refreshTokenNeedToUpdate()) {
-            $refreshToken = $userManager->updateOrCreateRefreshToken()->token;
+        $userRefreshToken = $user->refresh_token;
+        $refreshToken = optional($userRefreshToken)->token;
+
+        if ($userManager->refreshTokenNeedToUpdate($userRefreshToken, $userAgent)) {
+            $refreshToken = $userManager->updateOrCreateRefreshToken($user->id, $userAgent)->token;
         }
 
         return response()->json([
-            'token' => $userManager->createJWT(),
+            'token' => $userManager->createJWT($user),
             'refresh_token' => $refreshToken
         ]);
     }
