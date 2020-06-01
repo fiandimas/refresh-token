@@ -18,11 +18,6 @@ class UserManager
         return User::select('id', 'name', 'username', 'password')->where('id', $id)->first();
     }
 
-    public function appendRelation($user)
-    {
-        return $user->with();
-    }
-
     public function isRegistered($user)
     {
         if (is_null($user)) {
